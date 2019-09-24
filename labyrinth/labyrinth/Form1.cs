@@ -47,13 +47,13 @@ namespace labyrinth
                     if (y == player_pos[0] && x == player_pos[1])
                     {
                         if (player_dir == 'U')
-                            build_line.Append('⟰');
+                            build_line.Append('^');
                         if (player_dir == 'R')
-                            build_line.Append('⭆');
+                            build_line.Append('>');
                         if (player_dir == 'D')
-                            build_line.Append('⟱');
+                            build_line.Append('V');
                         if (player_dir == 'L')
-                            build_line.Append('⭅');
+                            build_line.Append('<');
                     }
 
                     else if (c == '*')
