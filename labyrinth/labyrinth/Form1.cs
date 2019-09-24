@@ -13,10 +13,11 @@ namespace labyrinth
 {
     public partial class Form1 : Form
     {
+        Random r = new Random();
 
         char[,] map_matrix = new char[9, 9];
 
-        char player_dir = 'U';
+        char player_dir = 'V';
 
         int[] player_pos = new int[2];
 
@@ -46,14 +47,7 @@ namespace labyrinth
                     // Draw player if current y,x is player's current pos
                     if (y == player_pos[0] && x == player_pos[1])
                     {
-                        if (player_dir == 'U')
-                            build_line.Append('^');
-                        if (player_dir == 'R')
-                            build_line.Append('>');
-                        if (player_dir == 'D')
-                            build_line.Append('V');
-                        if (player_dir == 'L')
-                            build_line.Append('<');
+                        build_line.Append(player_dir);
                     }
 
                     else if (c == '*')
@@ -67,8 +61,82 @@ namespace labyrinth
             }
         }
 
+        /// <summary>
+        /// Generates a 9x9 maze
+        /// </summary>
+        private void GenerateMaze()
+        {
+            int max_x = 7; // 7 because walls on 2 sides shouldn't be included
+            int max_y = 7; // ^^^
+            int c_x = 0;
+            int c_y = 0;
 
-        //Select and existing file to be used
+            List<int[]> stack = new List<int[]>();
+
+            bool[,] cells = new bool[max_x, max_y]; // False: Empty, True: Wall
+            bool[,] visited = new bool[max_x, max_y]; // False: Not visited, True: Visited
+
+            bool done = false;
+
+            while (!done)
+            {
+                List<int[]> unvisited = new List<int[]>(); // We will randomly select an unvisited cell
+
+                // Check neighbours
+                if (c_y != 0)
+                {
+                    // Up
+                    if (!visited[c_y - 1, c_x])
+                        unvisited.Add(new int[] { c_y - 1, c_x });
+                }
+                else if (c_x != 0)
+                {
+                    // Left
+                    if (!visited[c_y, c_x - 1])
+                        unvisited.Add(new int[] { c_y, c_x - 1});
+                }
+                else if (c_y != max_y-1)
+                {
+                    // Down
+                    if (!visited[c_y + 1, c_x])
+                        unvisited.Add(new int[] { c_y + 1, c_x });
+                }
+                else if (c_x != max_x - 1)
+                {
+                    // Right
+                    if (!visited[c_y, c_x + 1])
+                        unvisited.Add(new int[] { c_y, c_x + 1 });
+                }
+                
+                if (unvisited.Count != 0) // There are unvisited neighbours
+                {
+                    stack.Add(new int[] { c_y, c_x }); // Add current cell to stack so we can come back later.
+
+                    // Jump to one of the unvisited cells
+                    int[] random_unvisited = unvisited[r.Next(unvisited.Count)];
+
+                    c_y = random_unvisited[0];
+                    c_x = random_unvisited[1];
+                }
+                else
+                {
+                    // Remove current cell from stack if it's there
+                    stack.Remove(stack.Find(cell => cell[0] == c_y && cell[1] == c_x));
+
+                    if (stack.Count == 0)
+                        done = true;
+                    else
+                    {
+                        // Take the last item from stack, jump to it
+                        c_y = stack.Last()[0];
+                        c_x = stack.Last()[1];
+                    }
+                }
+            }
+        }
+
+
+        //Select an existing file to be used
         private void b_read_file_Click(object sender, EventArgs e)
         {
             OpenFileDialog open_labyrinth_file = new OpenFileDialog();
@@ -93,7 +161,6 @@ namespace labyrinth
             b_gen_new.Enabled = false;
         }
 
-
         //Exits the program
         private void b_exit_Click(object sender, EventArgs e)
         {
@@ -114,17 +181,17 @@ namespace labyrinth
             // Turn right
             switch (player_dir)
             {
-                case 'U':
-                    player_dir = 'R';
+                case '^':
+                    player_dir = '>';
                     break;
-                case 'R':
-                    player_dir = 'D';
+                case '>':
+                    player_dir = 'V';
                     break;
-                case 'D':
-                    player_dir = 'L';
+                case 'V':
+                    player_dir = '<';
                     break;
-                case 'L':
-                    player_dir = 'U';
+                case '<':
+                    player_dir = '^';
                     break;
             }
 
@@ -136,17 +203,17 @@ namespace labyrinth
             // Turn left
             switch (player_dir)
             {
-                case 'U':
-                    player_dir = 'L';
+                case '^':
+                    player_dir = '<';
                     break;
-                case 'L':
-                    player_dir = 'D';
+                case '<':
+                    player_dir = 'V';
                     break;
-                case 'D':
-                    player_dir = 'R';
+                case 'V':
+                    player_dir = '>';
                     break;
-                case 'R':
-                    player_dir = 'U';
+                case '>':
+                    player_dir = '^';
                     break;
             }
 
@@ -160,7 +227,7 @@ namespace labyrinth
 
             switch (player_dir)
             {
-                case 'U':
+                case '^':
                     if (py != 0)
                     {
                         if (map_matrix[py - 1, px] == '.')
@@ -168,7 +235,7 @@ namespace labyrinth
                     }
                     break;
 
-                case 'R':
+                case '>':
                     if (px != map_matrix.GetLength(1) - 1)
                     {
                         if (map_matrix[py, px + 1] == '.')
@@ -176,7 +243,7 @@ namespace labyrinth
                     }
                     break;
 
-                case 'D':
+                case 'V':
                     if (py != map_matrix.GetLength(0) - 1)
                     {
                         if (map_matrix[py + 1, px] == '.')
@@ -184,7 +251,7 @@ namespace labyrinth
                     }
                     break;
 
-                case 'L':
+                case '<':
                     if (px != 0)
                     {
                         if (map_matrix[py, px - 1] == '.')
