@@ -51,14 +51,19 @@ namespace labyrinth
                 {
                     char c = map_matrix[y, x];
 
+
+
                     // Draw player if current y,x is player's current pos
                     if (y == player_pos[0] && x == player_pos[1])
                     {
                         build_line.Append(player_dir);
                     }
 
+                    else if (c == 'C')
+                        build_line.Append("C");
+
                     else if (c == 'P')
-                        build_line.Append("P");
+                        build_line.Append(".");
 
                     else if (c == '*')
                         build_line.Append("*");
@@ -220,34 +225,48 @@ namespace labyrinth
             int y = player_pos[0];
             int x = player_pos[1];
 
+            // Previous and current direction.
+            int prev_dir = 0;
+            int dir = 0;
+
             while (!(y == exit[0] && x == exit[1]))
             {
                 List<int[]> possible_paths = new List<int[]>();
-                // path.Push(new int[] { y, x });
 
                 if (map_matrix[y + 1, x] == '.')
                 {
-                    possible_paths.Add(new int[] { y + 1, x });
+                    possible_paths.Add(new int[] { y + 1, x, 1 });
                 }
-                if (map_matrix[y, x+1] == '.')
+                if (map_matrix[y, x + 1] == '.')
                 {
-                    possible_paths.Add(new int[] { y, x + 1 });
+                    possible_paths.Add(new int[] { y, x + 1, 2 });
                 }
                 if (map_matrix[y - 1, x] == '.')
                 {
-                    possible_paths.Add(new int[] { y - 1, x });
+                    possible_paths.Add(new int[] { y - 1, x, 3 });
                 }
                 if (map_matrix[y, x - 1] == '.')
                 {
-                    possible_paths.Add(new int[] { y, x - 1 });
+                    possible_paths.Add(new int[] { y, x - 1, 4 });
                 }
 
                 map_matrix[y, x] = 'P';
 
                 if (possible_paths.Count > 0)
                 {
+                    // When we change the direction, place a checkpoint
+                    dir = possible_paths.First()[2];
+
+                    if (dir != prev_dir)
+                        map_matrix[y, x] = 'C';
+
+                    prev_dir = dir;
+
+                    // If there are more than one routes, add it to the stack
                     if (possible_paths.Count > 1)
+                    {
                         path.Push(new int[] { y, x });
+                    }
 
                     y = possible_paths.First()[0];
                     x = possible_paths.First()[1];
@@ -255,6 +274,7 @@ namespace labyrinth
                 }
                 else
                 {
+                    map_matrix[y, x] = 'P';
                     int[] last = path.Pop();
                     y = last[0];
                     x = last[1];
