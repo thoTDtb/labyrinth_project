@@ -28,3 +28,13 @@ C:\Users\e\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyri
 C:\Users\e\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.csproj.CoreCompileInputs.cache
 C:\Users\e\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.exe
 C:\Users\e\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.pdb
+C:\Users\Suli\Desktop\labyrinth_project-master\labyrinth\labyrinth\bin\Debug\labyrinth.exe.config
+C:\Users\Suli\Desktop\labyrinth_project-master\labyrinth\labyrinth\bin\Debug\labyrinth.exe
+C:\Users\Suli\Desktop\labyrinth_project-master\labyrinth\labyrinth\bin\Debug\labyrinth.pdb
+C:\Users\Suli\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.csprojAssemblyReference.cache
+C:\Users\Suli\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.Form1.resources
+C:\Users\Suli\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.Properties.Resources.resources
+C:\Users\Suli\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.csproj.GenerateResource.cache
+C:\Users\Suli\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.csproj.CoreCompileInputs.cache
+C:\Users\Suli\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.exe
+C:\Users\Suli\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.pdb

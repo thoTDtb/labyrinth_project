@@ -35,6 +35,8 @@ namespace labyrinth
             
             label1.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
             label2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+
+            lB_map.Font = new Font(FontFamily.GenericMonospace, lB_map.Font.Size);
         }
 
 
@@ -48,19 +50,24 @@ namespace labyrinth
                 for (int x = 0; x < 9; x++)
                 {
                     char c = map_matrix[y, x];
-                    
+
                     // Draw player if current y,x is player's current pos
                     if (y == player_pos[0] && x == player_pos[1])
                     {
                         build_line.Append(player_dir);
                     }
 
+                    else if (c == 'P')
+                        build_line.Append("P");
+
                     else if (c == '*')
-                        build_line.Append("▮");
+                        build_line.Append("*");
+                    //build_line.Append("▮");
 
                     else if (c == '.')
-                        build_line.Append("▯");
-                        
+                        build_line.Append(".");
+                    //build_line.Append("▯");
+
                 }
                 lB_map.Items.Add(build_line);
             }
@@ -213,38 +220,44 @@ namespace labyrinth
             int y = player_pos[0];
             int x = player_pos[1];
 
-            while (new int[] { y, x } != exit)
+            while (!(y == exit[0] && x == exit[1]))
             {
+                List<int[]> possible_paths = new List<int[]>();
+                // path.Push(new int[] { y, x });
+
                 if (map_matrix[y + 1, x] == '.')
                 {
-                    map_matrix[y, x] = '-';
-                    path.Push(new int[] { y, x });
-                    y++;
+                    possible_paths.Add(new int[] { y + 1, x });
                 }
-                else if (map_matrix[y, x+1] == '.')
+                if (map_matrix[y, x+1] == '.')
                 {
-                    map_matrix[y, x] = '-';
-                    path.Push(new int[] { y, x });
-                    x++;
+                    possible_paths.Add(new int[] { y, x + 1 });
                 }
-                else if (map_matrix[y - 1, x] == '.')
+                if (map_matrix[y - 1, x] == '.')
                 {
-                    map_matrix[y, x] = '-';
-                    path.Push(new int[] { y, x });
-                    y--;
+                    possible_paths.Add(new int[] { y - 1, x });
                 }
-                else if (map_matrix[y,x - 1] == '.')
+                if (map_matrix[y, x - 1] == '.')
                 {
-                    map_matrix[y, x] = '-';
-                    path.Push(new int[] { y, x });
-                    x--;
+                    possible_paths.Add(new int[] { y, x - 1 });
+                }
+
+                map_matrix[y, x] = 'P';
+
+                if (possible_paths.Count > 0)
+                {
+                    if (possible_paths.Count > 1)
+                        path.Push(new int[] { y, x });
+
+                    y = possible_paths.First()[0];
+                    x = possible_paths.First()[1];
+
                 }
                 else
                 {
-                    map_matrix[y, x] = '-';
-                    y = path.Last()[0];
-                    x = path.Last()[1];
-                    path.Pop();
+                    int[] last = path.Pop();
+                    y = last[0];
+                    x = last[1];
                 }
             }
         }
@@ -273,6 +286,40 @@ namespace labyrinth
             }
             b_start.Enabled = true;
             b_gen_new.Enabled = false;
+
+
+            int max_y = map_matrix.GetLength(0);
+            int max_x = map_matrix.GetLength(1);
+
+            for (int y = 0; y < max_y; y++)
+            {
+                if (map_matrix[y, 0] == '.')
+                {
+                    exit = new int[] { y, 0 };
+                    break;
+                }
+
+                if (map_matrix[y, max_x-1] == '.')
+                {
+                    exit = new int[] { y, max_x-1 };
+                    break;
+                }
+            }
+
+            for (int x = 0; x < max_x; x++)
+            {
+                if (map_matrix[0, x] == '.')
+                {
+                    exit = new int[] { 0, x };
+                    break;
+                }
+
+                if (map_matrix[max_y - 1, x] == '.')
+                {
+                    exit = new int[] { max_y - 1, x };
+                    break;
+                }
+            }
         }
 
         //Exits the program
@@ -287,6 +334,7 @@ namespace labyrinth
         {
             p_menu.Enabled = false;
             p_menu.Visible = false;
+            PathFinding();
             DisplayLabyrinth();
         }
 
