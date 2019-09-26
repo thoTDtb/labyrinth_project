@@ -18,3 +18,13 @@ E:\Projects\GitHub\labyrinth_project\labyrinth\labyrinth\obj\Debug\labyrinth.csp
 E:\Projects\GitHub\labyrinth_project\labyrinth\labyrinth\obj\Debug\labyrinth.csproj.CoreCompileInputs.cache
 E:\Projects\GitHub\labyrinth_project\labyrinth\labyrinth\obj\Debug\labyrinth.exe
 E:\Projects\GitHub\labyrinth_project\labyrinth\labyrinth\obj\Debug\labyrinth.pdb
+C:\Users\e\Desktop\labyrinth_project-master\labyrinth\labyrinth\bin\Debug\labyrinth.exe.config
+C:\Users\e\Desktop\labyrinth_project-master\labyrinth\labyrinth\bin\Debug\labyrinth.exe
+C:\Users\e\Desktop\labyrinth_project-master\labyrinth\labyrinth\bin\Debug\labyrinth.pdb
+C:\Users\e\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.csprojAssemblyReference.cache
+C:\Users\e\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.Form1.resources
+C:\Users\e\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.Properties.Resources.resources
+C:\Users\e\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.csproj.GenerateResource.cache
+C:\Users\e\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.csproj.CoreCompileInputs.cache
+C:\Users\e\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.exe
+C:\Users\e\Desktop\labyrinth_project-master\labyrinth\labyrinth\obj\Debug\labyrinth.pdb

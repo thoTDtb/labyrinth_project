@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
+using System.Diagnostics;
 
 namespace labyrinth
 {
@@ -20,6 +21,10 @@ namespace labyrinth
         char player_dir = 'V';
 
         int[] player_pos = new int[2];
+
+        int[] exit = new int[2];
+
+        Stack<int[]> path = new Stack<int[]>();
 
         public Form1()
         {
@@ -61,15 +66,34 @@ namespace labyrinth
             }
         }
 
+        private void ClearMaze()
+        {
+            map_matrix = new char[9, 9];
+
+            for (int y = 0; y < map_matrix.GetLength(0); y++)
+            {
+                for (int x = 0; x < map_matrix.GetLength(1); x++)
+                {
+                    map_matrix[y, x] = '*';
+                }
+            }
+
+            DisplayLabyrinth();
+        }
+
         /// <summary>
         /// Generates a 9x9 maze
         /// </summary>
         private void GenerateMaze()
         {
-            int max_x = 7; // 7 because walls on 2 sides shouldn't be included
-            int max_y = 7; // ^^^
-            int c_x = 0;
-            int c_y = 0;
+            ClearMaze();
+
+            int max_x = 9;
+            int max_y = 9;
+            int c_x = 1;
+            int c_y = 1;
+
+            bool exit_added = false;
 
             List<int[]> stack = new List<int[]>();
 
@@ -82,55 +106,145 @@ namespace labyrinth
             {
                 List<int[]> unvisited = new List<int[]>(); // We will randomly select an unvisited cell
 
+                // Set the current cell as visited
+                visited[c_y, c_x] = true;
+                map_matrix[c_y, c_x] = '.';
+
                 // Check neighbours
-                if (c_y != 0)
+                if (c_y - 2 > 0)
                 {
                     // Up
-                    if (!visited[c_y - 1, c_x])
-                        unvisited.Add(new int[] { c_y - 1, c_x });
+                    if (!visited[c_y - 2, c_x])
+                        unvisited.Add(new int[] { c_y - 2, c_x });
                 }
-                else if (c_x != 0)
+                if (c_x - 2 > 0)
                 {
                     // Left
-                    if (!visited[c_y, c_x - 1])
-                        unvisited.Add(new int[] { c_y, c_x - 1});
+                    if (!visited[c_y, c_x - 2])
+                        unvisited.Add(new int[] { c_y, c_x - 2});
                 }
-                else if (c_y != max_y-1)
+                if (c_y != max_y - 2)
                 {
                     // Down
-                    if (!visited[c_y + 1, c_x])
-                        unvisited.Add(new int[] { c_y + 1, c_x });
+                    if (!visited[c_y + 2, c_x])
+                        unvisited.Add(new int[] { c_y + 2, c_x });
                 }
-                else if (c_x != max_x - 1)
+                if (c_x != max_x - 2)
                 {
                     // Right
-                    if (!visited[c_y, c_x + 1])
-                        unvisited.Add(new int[] { c_y, c_x + 1 });
+                    if (!visited[c_y, c_x + 2])
+                        unvisited.Add(new int[] { c_y, c_x + 2 });
                 }
                 
-                if (unvisited.Count != 0) // There are unvisited neighbours
+                if (unvisited.Count > 0) // There are unvisited neighbours
                 {
-                    stack.Add(new int[] { c_y, c_x }); // Add current cell to stack so we can come back later.
+                    if (unvisited.Count > 1)
+                        stack.Add(new int[] { c_y, c_x }); // Add current cell to stack so we can come back later.
 
                     // Jump to one of the unvisited cells
                     int[] random_unvisited = unvisited[r.Next(unvisited.Count)];
 
+                    int old_y = c_y;
+                    int old_x = c_x;
+
                     c_y = random_unvisited[0];
                     c_x = random_unvisited[1];
+
+                    // Remove wall between the two cells, very odd way of doing it but it works :)
+
+                    if (old_y < c_y) // 5 5  7 5  = 6 5
+                        map_matrix[old_y + 1, c_x] = '.';
+                    else if (old_y > c_y)
+                        map_matrix[old_y - 1, c_x] = '.';
+
+                    else if (old_x < c_x)
+                        map_matrix[c_y, old_x + 1] = '.';
+                    else if (old_x > c_x)
+                        map_matrix[c_y, old_x - 1] = '.';
                 }
                 else
                 {
-                    // Remove current cell from stack if it's there
-                    stack.Remove(stack.Find(cell => cell[0] == c_y && cell[1] == c_x));
-
-                    if (stack.Count == 0)
+                    if (unvisited.Count == 0 && stack.Count == 0)
                         done = true;
-                    else
+
+                    else if (unvisited.Count == 0)
                     {
+                        if (!exit_added)
+                        {
+                            if (c_y + 1 == max_y - 1)
+                                exit = new int[] { c_y + 1, c_x };
+
+                            else if (c_x + 1 == max_x - 1)
+                                exit = new int[] { c_y, c_x + 1 };
+
+                            else if (c_y - 1 == 0)
+                                exit = new int[] { c_y - 1, c_x };
+
+                            else if (c_x - 1 == 0)
+                                exit = new int[] { c_y, c_x - 1 };
+
+                            map_matrix[exit[0], exit[1]] = '.';
+
+                            exit_added = true;
+
+                        }
+
                         // Take the last item from stack, jump to it
                         c_y = stack.Last()[0];
                         c_x = stack.Last()[1];
                     }
+                    
+                    // Remove current cell from stack if it's in there
+                    stack.Remove(stack.Find(cell => cell[0] == c_y && cell[1] == c_x));
+                }
+
+                if (c_x == max_x)
+                    lB_map.Enabled = false;
+
+            }
+
+            // Done, update listbox
+            PathFinding();
+            DisplayLabyrinth();
+        }
+
+        private void PathFinding()
+        {
+            int y = player_pos[0];
+            int x = player_pos[1];
+
+            while (new int[] { y, x } != exit)
+            {
+                if (map_matrix[y + 1, x] == '.')
+                {
+                    map_matrix[y, x] = '-';
+                    path.Push(new int[] { y, x });
+                    y++;
+                }
+                else if (map_matrix[y, x+1] == '.')
+                {
+                    map_matrix[y, x] = '-';
+                    path.Push(new int[] { y, x });
+                    x++;
+                }
+                else if (map_matrix[y - 1, x] == '.')
+                {
+                    map_matrix[y, x] = '-';
+                    path.Push(new int[] { y, x });
+                    y--;
+                }
+                else if (map_matrix[y,x - 1] == '.')
+                {
+                    map_matrix[y, x] = '-';
+                    path.Push(new int[] { y, x });
+                    x--;
+                }
+                else
+                {
+                    map_matrix[y, x] = '-';
+                    y = path.Last()[0];
+                    x = path.Last()[1];
+                    path.Pop();
                 }
             }
         }
@@ -261,6 +375,11 @@ namespace labyrinth
             }
 
             DisplayLabyrinth();
+        }
+
+        private void b_gen_new_Click(object sender, EventArgs e)
+        {
+            GenerateMaze();
         }
     }
 }
