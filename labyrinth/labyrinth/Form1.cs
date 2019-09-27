@@ -12,17 +12,54 @@ using System.Diagnostics;
 
 namespace labyrinth
 {
+    /// <summary>
+    /// Checkpoint for turns, used for pathfinding.
+    /// </summary>
+    struct Checkpoint
+    {
+        /// <summary>
+        /// Checkpoint's location
+        /// </summary>
+        public int[] coordinates;
+
+        /// <summary>
+        /// Path to this checkpoint's location, consists of coordinates
+        /// </summary>
+        public List<int[]> path;
+    }
+
     public partial class Form1 : Form
     {
         Random r = new Random();
+        
+        // Map size
+        int map_x = 9;
+        int map_y = 9;
 
-        char[,] map_matrix = new char[9, 9]; // map
-        char[,] path_matrix = new char[9, 9]; // pathfinding info
+        /// <summary>
+        /// Map data
+        /// </summary>
+        char[,] map_matrix = new char[9, 9];
 
+        /// <summary>
+        /// Pathfinding data
+        /// </summary>
+        char[,] path_matrix = new char[9, 9];
+
+        /// <summary>
+        /// Player's current Y and X coordinates
+        /// </summary>
         int[] player_pos = new int[2];
+
+        /// <summary>
+        /// Exit's coordinates
+        /// </summary>
         int[] exit = new int[2];
 
-        char player_dir = 'V'; // current player direction
+        /// <summary>
+        /// Current player direction
+        /// </summary>
+        char player_dir = 'V';
 
         public Form1()
         {
@@ -38,13 +75,13 @@ namespace labyrinth
         }
 
 
-        //Displays the labyrinth into the listbox, lB_map
-        private void DisplayLabyrinth()
+        //Displays the maze into the desired listbox
+        private void DisplayMaze(ListBox lb)
         {
-            lB_map.Items.Clear();
+            lb.Items.Clear();
             for (int y = 0; y < 9; y++)
             {
-                StringBuilder build_line = new StringBuilder();
+                string line = "";
                 for (int x = 0; x < 9; x++)
                 {
                     char c = map_matrix[y, x];
@@ -52,29 +89,21 @@ namespace labyrinth
 
                     // Draw player if current y,x is player's current pos
                     if (y == player_pos[0] && x == player_pos[1])
-                    {
-                        build_line.Append(player_dir);
-                    }
+                        line += player_dir;
 
-                    else if (path_c == 'C')
-                        build_line.Append("c");
-
-                    else if (c == 'P')
-                        build_line.Append(" ");
-
-                    else if (c == '*')
-                        build_line.Append("*");
-                    //build_line.Append("▮");
-
-                    else if (c == '.')
-                        build_line.Append(" ");
-                    //build_line.Append("▯");
+                    else if (path_c == 'C') line += "c";
+                    else if (c == 'P') line += " ";
+                    else if (c == '*') line += "*";
+                    else if (c == '.') line += " ";
 
                 }
-                lB_map.Items.Add(build_line);
+                lb.Items.Add(line);
             }
         }
 
+        /// <summary>
+        /// Clears the map data, thus resetting the maze.
+        /// </summary>
         private void ClearMaze()
         {
             map_matrix = new char[9, 9];
@@ -88,9 +117,11 @@ namespace labyrinth
             }
 
             ClearPathFinding();
-            DisplayLabyrinth();
         }
 
+        /// <summary>
+        /// Clears pathfinding data
+        /// </summary>
         private void ClearPathFinding()
         {
             path_matrix = new char[9, 9];
@@ -99,29 +130,28 @@ namespace labyrinth
         /// <summary>
         /// Generates a 9x9 maze
         /// </summary>
-        private void GenerateMaze()
+        /// <param name="max_x">x size of the map</param>
+        /// <param name="max_y">y size of the map</param>
+        private void GenerateMaze(int max_x, int max_y)
         {
             ClearMaze();
+            
+            int c_x = 1; // Current x position
+            int c_y = 1; // Current y position
 
-            int max_x = 9;
-            int max_y = 9;
-            int c_x = 1;
-            int c_y = 1;
+            bool exit_added = false; // Make sure we have an exit placed.
+            exit = new int[2]; // The exit's coordinates
 
-            bool exit_added = false;
-
-            List<int[]> stack = new List<int[]>();
-
-            bool[,] cells = new bool[max_x, max_y]; // False: Empty, True: Wall
+            Stack<int[]> junction_stack = new Stack<int[]>();
+            
             bool[,] visited = new bool[max_x, max_y]; // False: Not visited, True: Visited
 
             bool done = false;
 
-            exit = new int[2];
-
             while (!done)
             {
-                List<int[]> unvisited = new List<int[]>(); // We will randomly select an unvisited cell
+                // Store the neighbouring unvisited cells for later
+                List<int[]> unvisited = new List<int[]>();
 
                 // Set the current cell as visited
                 visited[c_y, c_x] = true;
@@ -156,9 +186,9 @@ namespace labyrinth
                 if (unvisited.Count > 0) // There are unvisited neighbours
                 {
                     if (unvisited.Count > 1)
-                        stack.Add(new int[] { c_y, c_x }); // Add current cell to stack so we can come back later.
+                        junction_stack.Push(new int[] { c_y, c_x }); // Add current cell to stack so we can come back later.
 
-                    // Jump to one of the unvisited cells
+                    // Jump to one of the random unvisited cells
                     int[] random_unvisited = unvisited[r.Next(unvisited.Count)];
 
                     int old_y = c_y;
@@ -181,7 +211,7 @@ namespace labyrinth
                 }
                 else
                 {
-                    if (unvisited.Count == 0 && stack.Count == 0)
+                    if (unvisited.Count == 0 && junction_stack.Count == 0)
                         done = true;
 
                     else if (unvisited.Count == 0)
@@ -208,48 +238,66 @@ namespace labyrinth
 
                         }
 
-                        // Take the last item from stack, jump to it
-                        c_y = stack.Last()[0];
-                        c_x = stack.Last()[1];
+                        // Pop the last item from stack, jump to it
+                        int[] last_junction = junction_stack.Pop();
+
+                        c_y = last_junction[0];
+                        c_x = last_junction[1];
                     }
-                    
-                    // Remove current cell from stack if it's in there
-                    stack.Remove(stack.Find(cell => cell[0] == c_y && cell[1] == c_x));
                 }
-
             }
-
-            // Done, update listbox
-            PathFinding();
-            DisplayLabyrinth();
         }
 
-        private void PathFinding()
+        /// <summary>
+        /// Copies an int[] array and returns it
+        /// </summary>
+        /// <param name="array">The array to copy</param>
+        /// <returns>The copied array, with a different pointer</returns>
+        private int[] CopyArray(int[] array)
         {
+            int[] new_array = new int[array.Length];
+            for (int i = 0; i < array.Length; i++)
+            {
+                new_array[i] = array[i];
+            }
+
+            return new_array;
+        }
+
+        /// <summary>
+        /// Attempts to find a path to the specified exit.
+        /// </summary>
+        /// <param name="map">Map array, where * are walls and . are paths</param>
+        /// <param name="exit_pos">Exit's position</param>
+        /// <param name="start_y">Starting Y coordiante</param>
+        /// <param name="start_x">Starting X coordiante</param>
+        private void PathFinding(char[,] map, int[] exit_pos, int start_y, int start_x)
+        {
+            ClearPathFinding();
+
             Stack<int[]> path = new Stack<int[]>(); // path stack
 
-            List<int[]> current_path = new List<int[]>(); // Path to the current checkpoint
-            List<int[,]> checkpoints = new List<int[,]>(); // Checkpoints, first is the coordinates, second is the path to it's position
+            List<int[]> path_to_checkpoint = new List<int[]>(); // Path to the current checkpoint
+            List<Checkpoint> checkpoints = new List<Checkpoint>(); // Checkpoints, first is the coordinates, second is the path to it's position
 
-            int y = player_pos[0];
-            int x = player_pos[1];
+            int y = start_y;
+            int x = start_x;
 
             // Previous and current direction.
             int prev_dir = 0;
             int dir = 0;
 
-            int retries = 0;
-
-            while (!(y == exit[0] && x == exit[1]))
+            while (!(y == exit_pos[0] && x == exit_pos[1]))
             {
                 List<int[]> possible_paths = new List<int[]>();
 
-                // If the neighbours aren't walls and they weren't visited before, make them a possible path
-                if (map_matrix[y + 1, x] == '.' && path_matrix[y + 1, x] == 0) possible_paths.Add(new int[] { y + 1, x, 1 });
-                if (map_matrix[y, x + 1] == '.' && path_matrix[y, x + 1] == 0) possible_paths.Add(new int[] { y, x + 1, 2 });
-                if (map_matrix[y - 1, x] == '.' && path_matrix[y - 1, x] == 0) possible_paths.Add(new int[] { y - 1, x, 3 });
-                if (map_matrix[y, x - 1] == '.' && path_matrix[y, x - 1] == 0) possible_paths.Add(new int[] { y, x - 1, 4 });
+                // If the neighbours aren't walls and they weren't visited before, mark them as a possible path
+                if (map[y + 1, x] == '.' && path_matrix[y + 1, x] == 0) possible_paths.Add(new int[] { y + 1, x, 1 });
+                if (map[y, x + 1] == '.' && path_matrix[y, x + 1] == 0) possible_paths.Add(new int[] { y, x + 1, 2 });
+                if (map[y - 1, x] == '.' && path_matrix[y - 1, x] == 0) possible_paths.Add(new int[] { y - 1, x, 3 });
+                if (map[y, x - 1] == '.' && path_matrix[y, x - 1] == 0) possible_paths.Add(new int[] { y, x - 1, 4 });
 
+                // Mark as visited
                 path_matrix[y, x] = 'P';
 
                 if (possible_paths.Count > 0)
@@ -262,6 +310,11 @@ namespace labyrinth
 
                     if (dir != prev_dir)
                     {
+                        Checkpoint cpoint = new Checkpoint();
+
+                        cpoint.coordinates = new int[] { y, x };
+                        
+
                         /*current_path.Add(new int[] { y, x });
 
                         List<int[]> temp_path = new List<int[]>();
@@ -293,18 +346,19 @@ namespace labyrinth
 
                     if (path.Count > 0)
                     {
+                        l_steps_taken.Text = "OK";
                         int[] last = path.Pop();
                         y = last[0];
                         x = last[1];
                     }
                     else
                     {
-                        l_steps_taken.Text = "RIP";
+                        // Pathfinding failed for unknown reasons.
                         break;
+                        
                         ClearPathFinding();
                         y = 1;
                         x = 1;
-                        retries++;
                     }
                 }
             }
@@ -312,69 +366,47 @@ namespace labyrinth
             
         }
 
-
-        //Select an existing file to be used
-        private void b_read_file_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Updates several game features
+        /// </summary>
+        private void UpdateGame()
         {
-            OpenFileDialog open_labyrinth_file = new OpenFileDialog();
-            if (open_labyrinth_file.ShowDialog() == DialogResult.OK)
+            PathFinding(map_matrix, exit, player_pos[0], player_pos[1]);
+            DisplayMaze(lB_map);
+        }
+
+        /// <summary>
+        /// Opens file dialog and loads the map from the file
+        /// </summary>
+        private void LoadFileIntoMap()
+        {
+            OpenFileDialog maze_file = new OpenFileDialog();
+
+            if (maze_file.ShowDialog() == DialogResult.OK)
             {
                 int index_y = 0;
-                StreamReader read_labyrinth_file = new StreamReader(open_labyrinth_file.FileName);
-                while (!read_labyrinth_file.EndOfStream)
+                int index_x = 0;
+
+                StreamReader fstream = new StreamReader(maze_file.FileName);
+                while (!fstream.EndOfStream)
                 {
-                    int index_x = 0;
-                    var temp_char_array = read_labyrinth_file.ReadLine().ToCharArray();
-                    foreach (var item in temp_char_array)
-                    {
-                        map_matrix[index_y, index_x] = item;
-                        index_x++;
-                    }
+                    string line = fstream.ReadLine();
+                    index_x = 0;
+
+                    foreach (char c in line) map_matrix[index_y, index_x++] = c;
+
                     index_y++;
                 }
-                read_labyrinth_file.Close();
+                fstream.Close();
+
+                b_start.Enabled = true;
             }
-            b_start.Enabled = true;
         }
 
-        //Exits the program
-        private void b_exit_Click(object sender, EventArgs e)
-        {
-            Form.ActiveForm.Close();
-        }
-
-
-        //Starts the game
-        private void b_start_Click(object sender, EventArgs e)
-        {
-            p_menu.Enabled = false;
-            p_menu.Visible = false;
-            DisplayLabyrinth();
-        }
-
-        private void b_right_Click(object sender, EventArgs e)
-        {
-            // Turn right
-            switch (player_dir)
-            {
-                case '^':
-                    player_dir = '>';
-                    break;
-                case '>':
-                    player_dir = 'V';
-                    break;
-                case 'V':
-                    player_dir = '<';
-                    break;
-                case '<':
-                    player_dir = '^';
-                    break;
-            }
-
-            UpdateGame();
-        }
-
-        private void b_left_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Turns the player left
+        /// </summary>
+        private void TurnLeft()
         {
             // Turn left
             switch (player_dir)
@@ -392,11 +424,35 @@ namespace labyrinth
                     player_dir = '^';
                     break;
             }
-
-            UpdateGame();
         }
 
-        private void b_step_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Turns the player right
+        /// </summary>
+        private void TurnRight()
+        {
+            // Turn right
+            switch (player_dir)
+            {
+                case '^':
+                    player_dir = '>';
+                    break;
+                case '>':
+                    player_dir = 'V';
+                    break;
+                case 'V':
+                    player_dir = '<';
+                    break;
+                case '<':
+                    player_dir = '^';
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Steps the player forward
+        /// </summary>
+        private void StepForward()
         {
             int py = player_pos[0];
             int px = player_pos[1];
@@ -435,20 +491,55 @@ namespace labyrinth
                     }
                     break;
             }
+        }
 
-            UpdateGame();
+        #region Form elements
+
+        private void b_read_file_Click(object sender, EventArgs e)
+        {
+            LoadFileIntoMap();
+            DisplayMaze(lB_map);
         }
 
         private void b_gen_new_Click(object sender, EventArgs e)
         {
-            GenerateMaze();
+            GenerateMaze(map_x, map_y);
+            UpdateGame();
             b_start.Enabled = true;
         }
 
-        private void UpdateGame()
+        //Starts the game
+        private void b_start_Click(object sender, EventArgs e)
         {
-            PathFinding();
-            DisplayLabyrinth();
+            p_menu.Enabled = false;
+            p_menu.Visible = false;
+            DisplayMaze(lB_map);
         }
+
+        private void b_right_Click(object sender, EventArgs e)
+        {
+            TurnRight();
+            UpdateGame();
+        }
+
+        private void b_left_Click(object sender, EventArgs e)
+        {
+            TurnLeft();
+            UpdateGame();
+        }
+
+        private void b_step_Click(object sender, EventArgs e)
+        {
+            StepForward();
+            UpdateGame();
+        }
+
+        //Exits the program
+        private void b_exit_Click(object sender, EventArgs e)
+        {
+            Form.ActiveForm.Close();
+        }
+
+        #endregion
     }
 }
