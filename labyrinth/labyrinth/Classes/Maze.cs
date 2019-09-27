@@ -23,6 +23,11 @@ namespace labyrinth.Classes
         /// </summary>
         private int[] exit;
 
+        /// <summary>
+        /// Random number generator
+        /// </summary>
+        private Random r;
+
         /* Private variables */
         /// <summary>
         /// X size of the maze
@@ -77,7 +82,102 @@ namespace labyrinth.Classes
 
             while (!done)
             {
+                unvisited.Clear();
 
+                visited[c_y, c_x] = true;
+                maze_matrix[c_y, c_x] = '.';
+
+                // Check neighbours and add them if they are unvisited
+                if (c_y - 2 > 0)
+                {
+                    // Up
+                    if (!visited[c_y - 2, c_x])
+                        unvisited.Add(new int[] { c_y - 2, c_x });
+                }
+                if (c_x - 2 > 0)
+                {
+                    // Left
+                    if (!visited[c_y, c_x - 2])
+                        unvisited.Add(new int[] { c_y, c_x - 2 });
+                }
+                if (c_y != max_y - 2)
+                {
+                    // Down
+                    if (!visited[c_y + 2, c_x])
+                        unvisited.Add(new int[] { c_y + 2, c_x });
+                }
+                if (c_x != max_x - 2)
+                {
+                    // Right
+                    if (!visited[c_y, c_x + 2])
+                        unvisited.Add(new int[] { c_y, c_x + 2 });
+                }
+
+                if (unvisited.Count > 0) // There are unvisited neighbours
+                {
+                    if (unvisited.Count > 1)
+                        junction_stack.Push(new int[] { c_y, c_x }); // Add current cell to stack so we can come back later.
+
+                    // Jump to one of the random unvisited cells
+                    int[] random_unvisited = unvisited[r.Next(unvisited.Count)];
+
+                    int old_y = c_y;
+                    int old_x = c_x;
+
+                    c_y = random_unvisited[0];
+                    c_x = random_unvisited[1];
+
+                    // Remove wall between the two cells, very odd way of doing it but it works :)
+
+                    // Vertical
+                    if (old_y < c_y)
+                        maze_matrix[old_y + 1, c_x] = '.';
+                    else if (old_y > c_y)
+                        maze_matrix[old_y - 1, c_x] = '.';
+
+                    // Horizontal
+                    else if (old_x < c_x)
+                        maze_matrix[c_y, old_x + 1] = '.';
+                    else if (old_x > c_x)
+                        maze_matrix[c_y, old_x - 1] = '.';
+                }
+                else
+                {
+                    if (unvisited.Count == 0 && junction_stack.Count == 0)
+                        done = true;
+
+                    else if (unvisited.Count == 0)
+                    {
+                        if (!exit_made)
+                        {
+                            // Check for a possible exit
+                            if (c_y + 1 == max_y - 1)
+                                exit = new int[] { c_y + 1, c_x };
+
+                            else if (c_x + 1 == max_x - 1)
+                                exit = new int[] { c_y, c_x + 1 };
+
+                            else if (c_y - 1 == 0)
+                                exit = new int[] { c_y - 1, c_x };
+
+                            else if (c_x - 1 == 0)
+                                exit = new int[] { c_y, c_x - 1 };
+
+                            // Make sure it's not on wrong coordinates
+                            if (exit[0] != 0 || exit[1] != 0)
+                            {
+                                maze_matrix[exit[0], exit[1]] = '.';
+                                exit_made = true;
+                            }
+                        }
+
+                        // Pop the last item from stack, jump to it
+                        int[] last_junction = junction_stack.Pop();
+
+                        c_y = last_junction[0];
+                        c_x = last_junction[1];
+                    }
+                }
             }
         }
 
