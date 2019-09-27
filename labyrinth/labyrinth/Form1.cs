@@ -102,21 +102,21 @@ namespace labyrinth
         }
 
         /// <summary>
-        /// Clears the map data, thus resetting the maze.
+        /// Sets every cell as a wall, thus resetting the maze.
         /// </summary>
-        private void ClearMaze()
+        private void ClearMaze(char[,] maze)
         {
-            map_matrix = new char[9, 9];
+            maze = new char[9, 9];
 
-            for (int y = 0; y < map_matrix.GetLength(0); y++)
+            for (int y = 0; y < maze.GetLength(0); y++)
             {
-                for (int x = 0; x < map_matrix.GetLength(1); x++)
+                for (int x = 0; x < maze.GetLength(1); x++)
                 {
-                    map_matrix[y, x] = '*';
+                    maze[y, x] = '*';
                 }
             }
 
-            ClearPathFinding();
+            //ClearPathFinding();
         }
 
         /// <summary>
@@ -128,14 +128,16 @@ namespace labyrinth
         }
 
         /// <summary>
-        /// Generates a 9x9 maze
+        /// Generates a 9x9 maze with a backtracking algorithm
         /// </summary>
         /// <param name="max_x">x size of the map</param>
         /// <param name="max_y">y size of the map</param>
-        private void GenerateMaze(int max_x, int max_y)
+        /// <returns>Generated maze</returns>
+        private char[,] GenerateMaze(int max_x, int max_y)
         {
-            ClearMaze();
-            
+            char[,] maze_gen = new char[max_y, max_x];
+            ClearMaze(maze_gen);
+
             int c_x = 1; // Current x position
             int c_y = 1; // Current y position
 
@@ -246,6 +248,8 @@ namespace labyrinth
                     }
                 }
             }
+
+            return maze_gen;
         }
 
         /// <summary>
