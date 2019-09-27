@@ -16,15 +16,13 @@ namespace labyrinth
     {
         Random r = new Random();
 
-        char[,] map_matrix = new char[9, 9];
-
-        char player_dir = 'V';
+        char[,] map_matrix = new char[9, 9]; // map
+        char[,] path_matrix = new char[9, 9]; // pathfinding info
 
         int[] player_pos = new int[2];
-
         int[] exit = new int[2];
 
-        Stack<int[]> path = new Stack<int[]>();
+        char player_dir = 'V'; // current player direction
 
         public Form1()
         {
@@ -50,8 +48,7 @@ namespace labyrinth
                 for (int x = 0; x < 9; x++)
                 {
                     char c = map_matrix[y, x];
-
-
+                    char path_c = path_matrix[y, x];
 
                     // Draw player if current y,x is player's current pos
                     if (y == player_pos[0] && x == player_pos[1])
@@ -59,18 +56,18 @@ namespace labyrinth
                         build_line.Append(player_dir);
                     }
 
-                    else if (c == 'C')
-                        build_line.Append("C");
+                    else if (path_c == 'C')
+                        build_line.Append("c");
 
                     else if (c == 'P')
-                        build_line.Append(".");
+                        build_line.Append(" ");
 
                     else if (c == '*')
                         build_line.Append("*");
                     //build_line.Append("▮");
 
                     else if (c == '.')
-                        build_line.Append(".");
+                        build_line.Append(" ");
                     //build_line.Append("▯");
 
                 }
@@ -90,7 +87,13 @@ namespace labyrinth
                 }
             }
 
+            ClearPathFinding();
             DisplayLabyrinth();
+        }
+
+        private void ClearPathFinding()
+        {
+            path_matrix = new char[9, 9];
         }
 
         /// <summary>
@@ -113,6 +116,8 @@ namespace labyrinth
             bool[,] visited = new bool[max_x, max_y]; // False: Not visited, True: Visited
 
             bool done = false;
+
+            exit = new int[2];
 
             while (!done)
             {
@@ -195,9 +200,11 @@ namespace labyrinth
                             else if (c_x - 1 == 0)
                                 exit = new int[] { c_y, c_x - 1 };
 
-                            map_matrix[exit[0], exit[1]] = '.';
-
-                            exit_added = true;
+                            if (exit[0] != 0 || exit[1] != 0)
+                            {
+                                map_matrix[exit[0], exit[1]] = '.';
+                                exit_added = true;
+                            }
 
                         }
 
@@ -210,9 +217,6 @@ namespace labyrinth
                     stack.Remove(stack.Find(cell => cell[0] == c_y && cell[1] == c_x));
                 }
 
-                if (c_x == max_x)
-                    lB_map.Enabled = false;
-
             }
 
             // Done, update listbox
@@ -222,6 +226,11 @@ namespace labyrinth
 
         private void PathFinding()
         {
+            Stack<int[]> path = new Stack<int[]>(); // path stack
+
+            List<int[]> current_path = new List<int[]>(); // Path to the current checkpoint
+            List<int[,]> checkpoints = new List<int[,]>(); // Checkpoints, first is the coordinates, second is the path to it's position
+
             int y = player_pos[0];
             int x = player_pos[1];
 
@@ -229,36 +238,42 @@ namespace labyrinth
             int prev_dir = 0;
             int dir = 0;
 
+            int retries = 0;
+
             while (!(y == exit[0] && x == exit[1]))
             {
                 List<int[]> possible_paths = new List<int[]>();
 
-                if (map_matrix[y + 1, x] == '.')
-                {
-                    possible_paths.Add(new int[] { y + 1, x, 1 });
-                }
-                if (map_matrix[y, x + 1] == '.')
-                {
-                    possible_paths.Add(new int[] { y, x + 1, 2 });
-                }
-                if (map_matrix[y - 1, x] == '.')
-                {
-                    possible_paths.Add(new int[] { y - 1, x, 3 });
-                }
-                if (map_matrix[y, x - 1] == '.')
-                {
-                    possible_paths.Add(new int[] { y, x - 1, 4 });
-                }
+                // If the neighbours aren't walls and they weren't visited before, make them a possible path
+                if (map_matrix[y + 1, x] == '.' && path_matrix[y + 1, x] == 0) possible_paths.Add(new int[] { y + 1, x, 1 });
+                if (map_matrix[y, x + 1] == '.' && path_matrix[y, x + 1] == 0) possible_paths.Add(new int[] { y, x + 1, 2 });
+                if (map_matrix[y - 1, x] == '.' && path_matrix[y - 1, x] == 0) possible_paths.Add(new int[] { y - 1, x, 3 });
+                if (map_matrix[y, x - 1] == '.' && path_matrix[y, x - 1] == 0) possible_paths.Add(new int[] { y, x - 1, 4 });
 
-                map_matrix[y, x] = 'P';
+                path_matrix[y, x] = 'P';
 
                 if (possible_paths.Count > 0)
                 {
+                    // Go in a random direction
+                    int[] random_choice = possible_paths[r.Next(possible_paths.Count)];
+
                     // When we change the direction, place a checkpoint
-                    dir = possible_paths.First()[2];
+                    dir = random_choice[2];
 
                     if (dir != prev_dir)
-                        map_matrix[y, x] = 'C';
+                    {
+                        /*current_path.Add(new int[] { y, x });
+
+                        List<int[]> temp_path = new List<int[]>();
+
+                        foreach (var checkpoint in current_path)
+                        {
+                            temp_path.Add(new int[] { checkpoint[0], checkpoint[1] });
+                        }
+
+                        checkpoints.Add(new int[,] { { y, x },  });*/
+                        path_matrix[y, x] = 'C';
+                    }
 
                     prev_dir = dir;
 
@@ -268,18 +283,33 @@ namespace labyrinth
                         path.Push(new int[] { y, x });
                     }
 
-                    y = possible_paths.First()[0];
-                    x = possible_paths.First()[1];
+                    y = random_choice[0];
+                    x = random_choice[1];
 
                 }
                 else
                 {
-                    map_matrix[y, x] = 'P';
-                    int[] last = path.Pop();
-                    y = last[0];
-                    x = last[1];
+                    path_matrix[y, x] = 'P';
+
+                    if (path.Count > 0)
+                    {
+                        int[] last = path.Pop();
+                        y = last[0];
+                        x = last[1];
+                    }
+                    else
+                    {
+                        l_steps_taken.Text = "RIP";
+                        break;
+                        ClearPathFinding();
+                        y = 1;
+                        x = 1;
+                        retries++;
+                    }
                 }
             }
+
+            
         }
 
 
@@ -305,41 +335,6 @@ namespace labyrinth
                 read_labyrinth_file.Close();
             }
             b_start.Enabled = true;
-            b_gen_new.Enabled = false;
-
-
-            int max_y = map_matrix.GetLength(0);
-            int max_x = map_matrix.GetLength(1);
-
-            for (int y = 0; y < max_y; y++)
-            {
-                if (map_matrix[y, 0] == '.')
-                {
-                    exit = new int[] { y, 0 };
-                    break;
-                }
-
-                if (map_matrix[y, max_x-1] == '.')
-                {
-                    exit = new int[] { y, max_x-1 };
-                    break;
-                }
-            }
-
-            for (int x = 0; x < max_x; x++)
-            {
-                if (map_matrix[0, x] == '.')
-                {
-                    exit = new int[] { 0, x };
-                    break;
-                }
-
-                if (map_matrix[max_y - 1, x] == '.')
-                {
-                    exit = new int[] { max_y - 1, x };
-                    break;
-                }
-            }
         }
 
         //Exits the program
@@ -354,7 +349,6 @@ namespace labyrinth
         {
             p_menu.Enabled = false;
             p_menu.Visible = false;
-            PathFinding();
             DisplayLabyrinth();
         }
 
@@ -377,7 +371,7 @@ namespace labyrinth
                     break;
             }
 
-            DisplayLabyrinth();
+            UpdateGame();
         }
 
         private void b_left_Click(object sender, EventArgs e)
@@ -399,7 +393,7 @@ namespace labyrinth
                     break;
             }
 
-            DisplayLabyrinth();
+            UpdateGame();
         }
 
         private void b_step_Click(object sender, EventArgs e)
@@ -442,12 +436,19 @@ namespace labyrinth
                     break;
             }
 
-            DisplayLabyrinth();
+            UpdateGame();
         }
 
         private void b_gen_new_Click(object sender, EventArgs e)
         {
             GenerateMaze();
+            b_start.Enabled = true;
+        }
+
+        private void UpdateGame()
+        {
+            PathFinding();
+            DisplayLabyrinth();
         }
     }
 }

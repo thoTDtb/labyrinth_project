@@ -51,14 +51,14 @@
             this.lB_map.Font = new System.Drawing.Font("Verdana", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lB_map.FormattingEnabled = true;
             this.lB_map.ItemHeight = 32;
-            this.lB_map.Location = new System.Drawing.Point(12, 12);
+            this.lB_map.Location = new System.Drawing.Point(30, 12);
             this.lB_map.Name = "lB_map";
-            this.lB_map.Size = new System.Drawing.Size(573, 292);
+            this.lB_map.Size = new System.Drawing.Size(300, 292);
             this.lB_map.TabIndex = 0;
             // 
             // b_left
             // 
-            this.b_left.Location = new System.Drawing.Point(330, 468);
+            this.b_left.Location = new System.Drawing.Point(93, 484);
             this.b_left.Name = "b_left";
             this.b_left.Size = new System.Drawing.Size(50, 50);
             this.b_left.TabIndex = 1;
@@ -68,7 +68,7 @@
             // 
             // b_step
             // 
-            this.b_step.Location = new System.Drawing.Point(386, 412);
+            this.b_step.Location = new System.Drawing.Point(149, 428);
             this.b_step.Name = "b_step";
             this.b_step.Size = new System.Drawing.Size(50, 50);
             this.b_step.TabIndex = 2;
@@ -78,7 +78,7 @@
             // 
             // b_right
             // 
-            this.b_right.Location = new System.Drawing.Point(442, 468);
+            this.b_right.Location = new System.Drawing.Point(205, 484);
             this.b_right.Name = "b_right";
             this.b_right.Size = new System.Drawing.Size(50, 50);
             this.b_right.TabIndex = 3;
@@ -88,7 +88,7 @@
             // 
             // label1
             // 
-            this.label1.Location = new System.Drawing.Point(136, 325);
+            this.label1.Location = new System.Drawing.Point(167, 325);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(100, 23);
             this.label1.TabIndex = 4;
@@ -96,7 +96,7 @@
             // 
             // label2
             // 
-            this.label2.Location = new System.Drawing.Point(12, 325);
+            this.label2.Location = new System.Drawing.Point(43, 325);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(100, 23);
             this.label2.TabIndex = 5;
@@ -104,7 +104,7 @@
             // 
             // b_step_auto
             // 
-            this.b_step_auto.Location = new System.Drawing.Point(386, 468);
+            this.b_step_auto.Location = new System.Drawing.Point(149, 484);
             this.b_step_auto.Name = "b_step_auto";
             this.b_step_auto.Size = new System.Drawing.Size(50, 50);
             this.b_step_auto.TabIndex = 6;
@@ -113,7 +113,7 @@
             // 
             // l_steps_req
             // 
-            this.l_steps_req.Location = new System.Drawing.Point(229, 325);
+            this.l_steps_req.Location = new System.Drawing.Point(260, 325);
             this.l_steps_req.Name = "l_steps_req";
             this.l_steps_req.Size = new System.Drawing.Size(40, 23);
             this.l_steps_req.TabIndex = 7;
@@ -121,7 +121,7 @@
             // 
             // l_steps_taken
             // 
-            this.l_steps_taken.Location = new System.Drawing.Point(90, 325);
+            this.l_steps_taken.Location = new System.Drawing.Point(121, 325);
             this.l_steps_taken.Name = "l_steps_taken";
             this.l_steps_taken.Size = new System.Drawing.Size(40, 23);
             this.l_steps_taken.TabIndex = 8;
@@ -133,7 +133,7 @@
             this.p_menu.Controls.Add(this.b_start);
             this.p_menu.Controls.Add(this.b_gen_new);
             this.p_menu.Controls.Add(this.b_read_file);
-            this.p_menu.Location = new System.Drawing.Point(12, 362);
+            this.p_menu.Location = new System.Drawing.Point(78, 351);
             this.p_menu.Name = "p_menu";
             this.p_menu.Size = new System.Drawing.Size(191, 287);
             this.p_menu.TabIndex = 9;
@@ -183,7 +183,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(597, 661);
+            this.ClientSize = new System.Drawing.Size(362, 661);
             this.Controls.Add(this.p_menu);
             this.Controls.Add(this.l_steps_taken);
             this.Controls.Add(this.l_steps_req);
