@@ -95,10 +95,9 @@ namespace labyrinth
                     if (y == player_pos[0] && x == player_pos[1])
                         line += player_dir;
 
-                    else if (path_c == 'C') line += "c";
-                    else if (c == 'P') line += " ";
+                    //else if (path_c == 'C') line += ".";
                     else if (c == '*') line += "*";
-                    else if (c == '.') line += " ";
+                    else if (c == '.') line += ".";
 
                 }
                 lb.Items.Add(line);
@@ -573,21 +572,17 @@ namespace labyrinth
         /// </summary>
         /// <param name="player_pos">Player's current position</param>
         /// <param name="exit">Exit's position</param>
-        private void Finish(int[] player_pos, int[] exit)
+        private void CheckFinish(int[] player_pos, int[] exit)
         {
             if (player_pos[0] == exit[0] && player_pos[1] == exit[1])
             {
-                DialogResult result = MessageBox.Show("Congratulations!\nYou reached the exit!", "Finish!", MessageBoxButtons.OK);
-                lB_map.Items.Clear();
                 p_menu.Enabled = true;
                 p_menu.Visible = true;
                 b_start.Enabled = false;
-                ClearMaze();
-                ClearPathFinding();
-                player_pos[0] = 1;
-                player_pos[1] = 1;
-                player_dir = 'V';
-                exit = new int[] { 0, 0 };
+                
+                timer_auto.Enabled = false;
+
+                DialogResult result = MessageBox.Show("Congratulations!\nYou reached the exit!", "Finish!", MessageBoxButtons.OK);
             }
         }
         
@@ -657,7 +652,7 @@ namespace labyrinth
             // Finally step forward
             StepForward();
 
-            Finish(player_pos, exit);
+            CheckFinish(player_pos, exit);
         }
 
         /// <summary>
@@ -761,7 +756,7 @@ namespace labyrinth
         {
             StepForward();
             UpdateGame();
-            Finish(player_pos, exit);
+            CheckFinish(player_pos, exit);
         }
 
         //Exits the program
