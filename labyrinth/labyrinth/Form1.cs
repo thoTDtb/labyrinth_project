@@ -267,7 +267,7 @@ namespace labyrinth
         /// <summary>
         /// Attempts to find a path to the specified exit.
         /// </summary>
-        /// <param name="map">Map array, where * are walls and . are paths</param>
+        /// <param name="map">Map matrix, where * are walls and . are paths</param>
         /// <param name="exit_pos">Exit's position</param>
         /// <param name="start_y">Starting Y coordiante</param>
         /// <param name="start_x">Starting X coordiante</param>
@@ -493,12 +493,35 @@ namespace labyrinth
             }
         }
 
+        /// <summary>
+        /// Find the exit in the maze
+        /// </summary>
+        /// <param name="map">Map array, where * are walls and . are paths</param>
+        /// <returns>Returns the position of the exit</returns>
+        private int[] FindExit(char[,] map)
+        {
+            int[] exit_pos = new int[2];
+            for (int y = 0; y < map_y; y++)
+            {
+                for (int x = 0; x < map_x; x++)
+                {
+                    if ((y == 0 || y == 8) && (map[y, x] == '.'))
+                        exit_pos = new int[] { y, x };
+                    else if ((x == 0 || x == 8) && (map[y, x] == '.'))
+                        exit_pos = new int[] { y, x };
+                }
+            }
+
+            return exit_pos;
+        }
+
         #region Form elements
 
         private void b_read_file_Click(object sender, EventArgs e)
         {
             LoadFileIntoMap();
             DisplayMaze(lB_map);
+            exit = FindExit(map_matrix);
         }
 
         private void b_gen_new_Click(object sender, EventArgs e)
