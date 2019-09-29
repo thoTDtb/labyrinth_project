@@ -291,7 +291,7 @@ namespace labyrinth
         {
             ClearPathFinding();
 
-            Stack<int[]> path = new Stack<int[]>(); // path stack
+            Stack<int[]> junction_stack = new Stack<int[]>(); // path stack
 
             List<int[]> path_to_checkpoint = new List<int[]>(); // Path to the current checkpoint
             List<Checkpoint> checkpoints = new List<Checkpoint>(); // Checkpoints, first is the coordinates, second is the path to it's position
@@ -324,24 +324,17 @@ namespace labyrinth
                     // When we change the direction, place a checkpoint
                     dir = random_choice[2];
 
-                    if (dir != prev_dir)
+                    // If we change direction or come to a junction, add a checkpoint
+                    if (dir != prev_dir || possible_paths.Count > 1)
                     {
+                        path_to_checkpoint.Add(new int[] { y, x });
+
                         Checkpoint cpoint = new Checkpoint();
 
                         cpoint.coordinates = new int[] { y, x };
                         cpoint.path = CopyList(path_to_checkpoint);
 
-                        /*current_path.Add(new int[] { y, x });
-
-                        List<int[]> temp_path = new List<int[]>();
-
-                        foreach (var checkpoint in current_path)
-                        {
-                            temp_path.Add(new int[] { checkpoint[0], checkpoint[1] });
-                        }
-
-                        checkpoints.Add(new int[,] { { y, x },  });*/
-                        path_matrix[y, x] = 'C';
+                        checkpoints.Add(cpoint);
                     }
 
                     prev_dir = dir;
@@ -349,7 +342,7 @@ namespace labyrinth
                     // If there are more than one routes, add it to the stack
                     if (possible_paths.Count > 1)
                     {
-                        path.Push(new int[] { y, x });
+                        junction_stack.Push(new int[] { y, x });
                     }
 
                     y = random_choice[0];
@@ -360,12 +353,16 @@ namespace labyrinth
                 {
                     path_matrix[y, x] = 'P';
 
-                    if (path.Count > 0)
+                    // Jump back to the previous saved junction
+                    if (junction_stack.Count > 0)
                     {
-                        l_steps_taken.Text = "OK";
-                        int[] last = path.Pop();
+                        int[] last = junction_stack.Pop();
                         y = last[0];
                         x = last[1];
+
+                        // Find the checkpoint associated and set it as the current path
+                        Checkpoint cpoint = checkpoints.Find(c => c.coordinates[0] == y && c.coordinates[1] == x);
+                        path_to_checkpoint = CopyList(cpoint.path);
                     }
                     else
                     {
@@ -379,7 +376,10 @@ namespace labyrinth
                 }
             }
 
-            
+            foreach (var cpoint in path_to_checkpoint)
+            {
+                path_matrix[cpoint[0], cpoint[1]] = 'C';
+            }
         }
 
         /// <summary>
