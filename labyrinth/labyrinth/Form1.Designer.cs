@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.lB_map = new System.Windows.Forms.ListBox();
             this.b_left = new System.Windows.Forms.Button();
             this.b_step = new System.Windows.Forms.Button();
@@ -43,6 +44,7 @@
             this.b_gen_new = new System.Windows.Forms.Button();
             this.b_read_file = new System.Windows.Forms.Button();
             this.b_back_to_menu = new System.Windows.Forms.Button();
+            this.timer_auto = new System.Windows.Forms.Timer(this.components);
             this.p_menu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -111,6 +113,7 @@
             this.b_step_auto.TabIndex = 6;
             this.b_step_auto.Text = "Auto";
             this.b_step_auto.UseVisualStyleBackColor = true;
+            this.b_step_auto.Click += new System.EventHandler(this.b_step_auto_Click);
             // 
             // l_steps_req
             // 
@@ -134,7 +137,7 @@
             this.p_menu.Controls.Add(this.b_start);
             this.p_menu.Controls.Add(this.b_gen_new);
             this.p_menu.Controls.Add(this.b_read_file);
-            this.p_menu.Location = new System.Drawing.Point(78, 351);
+            this.p_menu.Location = new System.Drawing.Point(76, 351);
             this.p_menu.Name = "p_menu";
             this.p_menu.Size = new System.Drawing.Size(191, 287);
             this.p_menu.TabIndex = 9;
@@ -190,6 +193,11 @@
             this.b_back_to_menu.UseVisualStyleBackColor = true;
             this.b_back_to_menu.Click += new System.EventHandler(this.b_back_to_menu_Click);
             // 
+            // timer_auto
+            // 
+            this.timer_auto.Interval = 500;
+            this.timer_auto.Tick += new System.EventHandler(this.timer_auto_Tick);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -230,6 +238,7 @@
         private System.Windows.Forms.Button b_gen_new;
         private System.Windows.Forms.Button b_read_file;
         private System.Windows.Forms.Button b_back_to_menu;
+        private System.Windows.Forms.Timer timer_auto;
     }
 }
 

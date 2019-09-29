@@ -61,6 +61,11 @@ namespace labyrinth
         /// </summary>
         char player_dir = 'V';
 
+        /// <summary>
+        /// Steps taken from start
+        /// </summary>
+        int steps_taken = 0;
+
         public Form1()
         {
             InitializeComponent();
@@ -376,19 +381,28 @@ namespace labyrinth
                 }
             }
 
+            ClearPathFinding();
             foreach (var cpoint in path_to_checkpoint)
             {
-                path_matrix[cpoint[0], cpoint[1]] = 'C';
+                // Remove checkpoint from player's position
+                if (cpoint[0] == player_pos[0] && cpoint[1] == player_pos[1])
+                    path_matrix[cpoint[0], cpoint[1]] = 'P';
+                else
+                    path_matrix[cpoint[0], cpoint[1]] = 'C';
             }
+
+            // Put checkpoint on exit
+            path_matrix[exit[0], exit[1]] = 'C';
         }
 
         /// <summary>
-        /// Updates several game features
+        /// Does pathfinding and updates the listbox
         /// </summary>
         private void UpdateGame()
         {
             PathFinding(map_matrix, exit, player_pos[0], player_pos[1]);
             DisplayMaze(lB_map);
+            l_steps_taken.Text = steps_taken.ToString();
         }
 
         /// <summary>
@@ -507,6 +521,9 @@ namespace labyrinth
                     }
                     break;
             }
+
+            if (py != player_pos[0] || px != player_pos[1])
+                steps_taken++;
         }
 
         /// <summary>
@@ -553,6 +570,105 @@ namespace labyrinth
                 player_dir = 'V';
                 exit = new int[] { 0, 0 };
             }
+        }
+
+        /// <summary>
+        /// Makes the player step towards the exit automatically
+        /// </summary>
+        private void StepPlayerToExit()
+        {
+            int p_y = player_pos[0];
+            int p_x = player_pos[1];
+
+            // Look for a checkpoint and turn that way
+            int[] cpoint_next = LookForCheckpoint(player_pos);
+
+            // Failed to find checkpoint
+            if (cpoint_next[0] == -1 || cpoint_next[1] == -1)
+                return;
+
+            if (p_y < cpoint_next[0])
+            {
+                player_dir = 'V';
+            }
+            else if (p_y > cpoint_next[0])
+            {
+                player_dir = '^';
+            }
+            else if (p_x > cpoint_next[1])
+            {
+                player_dir = '<';
+            }
+            else if (p_x < cpoint_next[1])
+            {
+                player_dir = '>';
+            }
+
+            // Finally step forward
+            StepForward();
+
+            Finish(player_pos, exit);
+        }
+
+        /// <summary>
+        /// Checks in every direction to find a checkpoint (until it hits a wall)
+        /// </summary>
+        /// <param name="pos">Position to start from</param>
+        /// <returns>checkpoint's position</returns>
+        private int[] LookForCheckpoint(int[] pos)
+        {
+            int p_y = pos[0];
+            int p_x = pos[1];
+
+            // Right
+            for (int x = p_x; x < map_x; x ++)
+            {
+                if (map_matrix[p_y, x] == '*')
+                    break;
+
+                if (path_matrix[p_y, x] == 'C')
+                {
+                    return new int[] { p_y, x };
+                }
+            }
+
+            // Left
+            for (int x = p_x; x >= 0; x--)
+            {
+                if (map_matrix[p_y, x] == '*')
+                    break;
+
+                if (path_matrix[p_y, x] == 'C')
+                {
+                    return new int[] { p_y, x };
+                }
+            }
+
+            // Up
+            for (int y = p_y; y >= 0; y--)
+            {
+                if (map_matrix[y, p_x] == '*')
+                    break;
+
+                if (path_matrix[y, p_x] == 'C')
+                {
+                    return new int[] { y, p_x };
+                }
+            }
+
+            // Down
+            for (int y = p_y; y < map_y; y++)
+            {
+                if (map_matrix[y, p_x] == '*')
+                    break;
+
+                if (path_matrix[y, p_x] == 'C')
+                {
+                    return new int[] { y, p_x };
+                }
+            }
+
+            return new int[] { -1, -1 };
         }
 
         #region Form elements
@@ -616,6 +732,33 @@ namespace labyrinth
             player_pos[1] = 1;
             player_dir = 'V';
             exit = new int[] { 0, 0 };
+        }
+
+        /// <summary>
+        /// Enables auto timer
+        /// </summary>
+        private void b_step_auto_Click(object sender, EventArgs e)
+        {
+            if (!timer_auto.Enabled)
+            {
+                timer_auto.Enabled = true;
+                b_left.Enabled = false;
+                b_right.Enabled = false;
+                b_step.Enabled = false;
+            }
+            else
+            {
+                timer_auto.Enabled = false;
+                b_left.Enabled = true;
+                b_right.Enabled = true;
+                b_step.Enabled = true;
+            }
+        }
+
+        private void timer_auto_Tick(object sender, EventArgs e)
+        {
+            StepPlayerToExit();
+            UpdateGame();
         }
 
         #endregion
