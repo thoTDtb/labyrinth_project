@@ -42,6 +42,7 @@
             this.b_start = new System.Windows.Forms.Button();
             this.b_gen_new = new System.Windows.Forms.Button();
             this.b_read_file = new System.Windows.Forms.Button();
+            this.b_back_to_menu = new System.Windows.Forms.Button();
             this.p_menu.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -179,6 +180,16 @@
             this.b_read_file.UseVisualStyleBackColor = true;
             this.b_read_file.Click += new System.EventHandler(this.b_read_file_Click);
             // 
+            // b_back_to_menu
+            // 
+            this.b_back_to_menu.Location = new System.Drawing.Point(100, 574);
+            this.b_back_to_menu.Name = "b_back_to_menu";
+            this.b_back_to_menu.Size = new System.Drawing.Size(150, 23);
+            this.b_back_to_menu.TabIndex = 10;
+            this.b_back_to_menu.Text = "Back to Menu";
+            this.b_back_to_menu.UseVisualStyleBackColor = true;
+            this.b_back_to_menu.Click += new System.EventHandler(this.b_back_to_menu_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -194,6 +205,7 @@
             this.Controls.Add(this.lB_map);
             this.Controls.Add(this.b_left);
             this.Controls.Add(this.b_step);
+            this.Controls.Add(this.b_back_to_menu);
             this.Name = "Form1";
             this.Text = "Form1";
             this.p_menu.ResumeLayout(false);
@@ -217,6 +229,7 @@
         private System.Windows.Forms.Button b_start;
         private System.Windows.Forms.Button b_gen_new;
         private System.Windows.Forms.Button b_read_file;
+        private System.Windows.Forms.Button b_back_to_menu;
     }
 }
 

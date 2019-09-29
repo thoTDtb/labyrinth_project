@@ -498,6 +498,7 @@ namespace labyrinth
         /// </summary>
         /// <param name="map">Map array, where * are walls and . are paths</param>
         /// <returns>Returns the position of the exit</returns>
+        //This was necessary because the "PathFinding" method required the exit's coordinates which were 0, 0 by default so the program crashed 
         private int[] FindExit(char[,] map)
         {
             int[] exit_pos = new int[2];
@@ -515,7 +516,11 @@ namespace labyrinth
             return exit_pos;
         }
 
-
+        /// <summary>
+        /// Checks if the player is at the exit 
+        /// </summary>
+        /// <param name="player_pos">Player's current position</param>
+        /// <param name="exit">Exit's position</param>
         private void Finish(int[] player_pos, int[] exit)
         {
             if (player_pos[0] == exit[0] && player_pos[1] == exit[1])
@@ -581,6 +586,20 @@ namespace labyrinth
         private void b_exit_Click(object sender, EventArgs e)
         {
             Form.ActiveForm.Close();
+        }
+
+        //Re-enables the menu panel
+        private void b_back_to_menu_Click(object sender, EventArgs e)
+        {
+            p_menu.Enabled = true;
+            p_menu.Visible = true;
+            b_start.Enabled = false;
+            ClearMaze();
+            ClearPathFinding();
+            player_pos[0] = 1;
+            player_pos[1] = 1;
+            player_dir = 'V';
+            exit = new int[] { 0, 0 };
         }
 
         #endregion
