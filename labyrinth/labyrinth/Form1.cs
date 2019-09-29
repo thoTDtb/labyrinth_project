@@ -515,6 +515,25 @@ namespace labyrinth
             return exit_pos;
         }
 
+
+        private void Finish(int[] player_pos, int[] exit)
+        {
+            if (player_pos[0] == exit[0] && player_pos[1] == exit[1])
+            {
+                DialogResult result = MessageBox.Show("Congratulations!\nYou reached the exit!", "Finish!", MessageBoxButtons.OK);
+                lB_map.Items.Clear();
+                p_menu.Enabled = true;
+                p_menu.Visible = true;
+                b_start.Enabled = false;
+                ClearMaze();
+                ClearPathFinding();
+                player_pos[0] = 1;
+                player_pos[1] = 1;
+                player_dir = 'V';
+                exit = new int[] { 0, 0 };
+            }
+        }
+
         #region Form elements
 
         private void b_read_file_Click(object sender, EventArgs e)
@@ -555,6 +574,7 @@ namespace labyrinth
         {
             StepForward();
             UpdateGame();
+            Finish(player_pos, exit);
         }
 
         //Exits the program
