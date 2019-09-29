@@ -583,6 +583,9 @@ namespace labyrinth
                 timer_auto.Enabled = false;
 
                 DialogResult result = MessageBox.Show("Congratulations!\nYou reached the exit!", "Finish!", MessageBoxButtons.OK);
+
+                Reset_Game(exit, player_pos, player_dir);
+
             }
         }
 
@@ -724,6 +727,25 @@ namespace labyrinth
             return new int[] { -1, -1 };
         }
 
+        /// <summary>
+        /// Resets the program to its starting phase
+        /// </summary>
+        /// <param name="exit_pos">Exit's loaction</param>
+        /// <param name="player_position">Player's position</param>
+        /// <param name="player_direction">Player's direction</param>
+        private void Reset_Game(int[] exit_pos, int[] player_position, char player_direction)
+        {
+            p_menu.Enabled = true;
+            p_menu.Visible = true;
+            b_start.Enabled = false;
+            ClearMaze();
+            ClearPathFinding();
+            player_position[0] = 1;
+            player_position[1] = 1;
+            player_direction = 'V';
+            exit_pos = new int[] { 0, 0 };
+        }
+
         #region Form elements
         
         private void b_read_file_Click(object sender, EventArgs e)
@@ -775,15 +797,7 @@ namespace labyrinth
         //Re-enables the menu panel
         private void b_back_to_menu_Click(object sender, EventArgs e)
         {
-            p_menu.Enabled = true;
-            p_menu.Visible = true;
-            b_start.Enabled = false;
-            ClearMaze();
-            ClearPathFinding();
-            player_pos[0] = 1;
-            player_pos[1] = 1;
-            player_dir = 'V';
-            exit = new int[] { 0, 0 };
+            Reset_Game(exit, player_pos, player_dir);
         }
 
         /// <summary>
