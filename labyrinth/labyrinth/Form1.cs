@@ -79,7 +79,6 @@ namespace labyrinth
             lB_map.Font = new Font(FontFamily.GenericMonospace, lB_map.Font.Size);
         }
 
-
         //Displays the maze into the desired listbox
         private void DisplayMaze(ListBox lb)
         {
@@ -270,6 +269,25 @@ namespace labyrinth
         }
 
         /// <summary>
+        /// Copies a char matrix and returns it
+        /// </summary>
+        /// <param name="matrix">The matrix to copy</param>
+        /// <returns>The copied matrix, with a different pointer</returns>
+        private char[,] CopyMatrix(char[,] matrix)
+        {
+            char[,] new_matrix = new char[matrix.GetLength(0), matrix.GetLength(1)];
+            for (int y = 0; y < matrix.GetLength(0); y++)
+            {
+                for (int x = 0; x < matrix.GetLength(1); x++)
+                {
+                    new_matrix[y, x] = matrix[y, x];
+                }
+            }
+
+            return new_matrix;
+        }
+
+        /// <summary>
         /// Copies an int[] list and returns it
         /// </summary>
         /// <param name="list">The list to copy</param>
@@ -386,7 +404,7 @@ namespace labyrinth
             {
                 // Remove checkpoint from player's position
                 if (cpoint[0] == player_pos[0] && cpoint[1] == player_pos[1])
-                    path_matrix[cpoint[0], cpoint[1]] = 'P';
+                    path_matrix[cpoint[0], cpoint[1]] = (char)0;
                 else
                     path_matrix[cpoint[0], cpoint[1]] = 'C';
             }
@@ -403,6 +421,7 @@ namespace labyrinth
             PathFinding(map_matrix, exit, player_pos[0], player_pos[1]);
             DisplayMaze(lB_map);
             l_steps_taken.Text = steps_taken.ToString();
+            l_steps_req.Text = GetSteps().ToString();
         }
 
         /// <summary>
@@ -571,6 +590,37 @@ namespace labyrinth
                 exit = new int[] { 0, 0 };
             }
         }
+        
+        private int GetSteps()
+        {
+            int steps = 0;
+
+            int c_y = player_pos[0];
+            int c_x = player_pos[1];
+
+            char[,] new_path_matrix = CopyMatrix(path_matrix);
+            int[] next_cpoint;
+
+            while (true)
+            {
+                next_cpoint = LookForCheckpoint(new int[] { c_y, c_x }, map_matrix, new_path_matrix);
+
+                if (next_cpoint[0] == -1 || next_cpoint[1] == -1)
+                    break;
+
+                if (next_cpoint[0] != c_y)
+                    steps += Math.Abs(next_cpoint[0] - c_y);
+                else if (next_cpoint[1] != c_x)
+                    steps += Math.Abs(next_cpoint[1] - c_x);
+
+                new_path_matrix[next_cpoint[0], next_cpoint[1]] = (char)0;
+
+                c_y = next_cpoint[0];
+                c_x = next_cpoint[1];
+            }
+
+            return steps;
+        }
 
         /// <summary>
         /// Makes the player step towards the exit automatically
@@ -581,7 +631,7 @@ namespace labyrinth
             int p_x = player_pos[1];
 
             // Look for a checkpoint and turn that way
-            int[] cpoint_next = LookForCheckpoint(player_pos);
+            int[] cpoint_next = LookForCheckpoint(player_pos, map_matrix, path_matrix);
 
             // Failed to find checkpoint
             if (cpoint_next[0] == -1 || cpoint_next[1] == -1)
@@ -615,7 +665,7 @@ namespace labyrinth
         /// </summary>
         /// <param name="pos">Position to start from</param>
         /// <returns>checkpoint's position</returns>
-        private int[] LookForCheckpoint(int[] pos)
+        private int[] LookForCheckpoint(int[] pos, char[,] map, char[,] path_map)
         {
             int p_y = pos[0];
             int p_x = pos[1];
@@ -623,10 +673,10 @@ namespace labyrinth
             // Right
             for (int x = p_x; x < map_x; x ++)
             {
-                if (map_matrix[p_y, x] == '*')
+                if (map[p_y, x] == '*')
                     break;
 
-                if (path_matrix[p_y, x] == 'C')
+                if (path_map[p_y, x] == 'C')
                 {
                     return new int[] { p_y, x };
                 }
@@ -635,10 +685,10 @@ namespace labyrinth
             // Left
             for (int x = p_x; x >= 0; x--)
             {
-                if (map_matrix[p_y, x] == '*')
+                if (map[p_y, x] == '*')
                     break;
 
-                if (path_matrix[p_y, x] == 'C')
+                if (path_map[p_y, x] == 'C')
                 {
                     return new int[] { p_y, x };
                 }
@@ -647,10 +697,10 @@ namespace labyrinth
             // Up
             for (int y = p_y; y >= 0; y--)
             {
-                if (map_matrix[y, p_x] == '*')
+                if (map[y, p_x] == '*')
                     break;
 
-                if (path_matrix[y, p_x] == 'C')
+                if (path_map[y, p_x] == 'C')
                 {
                     return new int[] { y, p_x };
                 }
@@ -659,10 +709,10 @@ namespace labyrinth
             // Down
             for (int y = p_y; y < map_y; y++)
             {
-                if (map_matrix[y, p_x] == '*')
+                if (map[y, p_x] == '*')
                     break;
 
-                if (path_matrix[y, p_x] == 'C')
+                if (path_map[y, p_x] == 'C')
                 {
                     return new int[] { y, p_x };
                 }
