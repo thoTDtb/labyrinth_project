@@ -585,7 +585,11 @@ namespace labyrinth
                 DialogResult result = MessageBox.Show("Congratulations!\nYou reached the exit!", "Finish!", MessageBoxButtons.OK);
             }
         }
-        
+
+        /// <summary>
+        /// Returns the amount of steps required to the exit
+        /// </summary>
+        /// <returns>Amount of steps required to the exit</returns>
         private int GetSteps()
         {
             int steps = 0;
@@ -624,6 +628,7 @@ namespace labyrinth
         {
             int p_y = player_pos[0];
             int p_x = player_pos[1];
+            char new_player_dir = 'V';
 
             // Look for a checkpoint and turn that way
             int[] cpoint_next = LookForCheckpoint(player_pos, map_matrix, path_matrix);
@@ -631,26 +636,29 @@ namespace labyrinth
             // Failed to find checkpoint
             if (cpoint_next[0] == -1 || cpoint_next[1] == -1)
                 return;
-
+            
             if (p_y < cpoint_next[0])
             {
-                player_dir = 'V';
+                new_player_dir = 'V';
             }
             else if (p_y > cpoint_next[0])
             {
-                player_dir = '^';
+                new_player_dir = '^';
             }
             else if (p_x > cpoint_next[1])
             {
-                player_dir = '<';
+                new_player_dir = '<';
             }
             else if (p_x < cpoint_next[1])
             {
-                player_dir = '>';
+                new_player_dir = '>';
             }
 
-            // Finally step forward
-            StepForward();
+            // We first turn, then actually step when we're in the right direction
+            if (new_player_dir == player_dir)
+                StepForward();
+            else
+                player_dir = new_player_dir;
 
             CheckFinish(player_pos, exit);
         }
@@ -717,7 +725,7 @@ namespace labyrinth
         }
 
         #region Form elements
-
+        
         private void b_read_file_Click(object sender, EventArgs e)
         {
             LoadFileIntoMap();
@@ -731,8 +739,7 @@ namespace labyrinth
             UpdateGame();
             b_start.Enabled = true;
         }
-
-        //Starts the game
+        
         private void b_start_Click(object sender, EventArgs e)
         {
             p_menu.Enabled = false;
@@ -800,6 +807,9 @@ namespace labyrinth
             }
         }
 
+        /// <summary>
+        /// Gets called every 500 miliseconds
+        /// </summary>
         private void timer_auto_Tick(object sender, EventArgs e)
         {
             StepPlayerToExit();
