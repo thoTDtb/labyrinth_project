@@ -265,6 +265,22 @@ namespace labyrinth
         }
 
         /// <summary>
+        /// Copies an int[] list and returns it
+        /// </summary>
+        /// <param name="list">The list to copy</param>
+        /// <returns>The copied list, with a different pointer</returns>
+        private List<int[]> CopyList(List<int[]> list)
+        {
+            List<int[]> new_list = new List<int[]>();
+            foreach (var item in list)
+            {
+                new_list.Add(item);
+            }
+
+            return new_list;
+        }
+
+        /// <summary>
         /// Attempts to find a path to the specified exit.
         /// </summary>
         /// <param name="map">Map matrix, where * are walls and . are paths</param>
@@ -313,7 +329,7 @@ namespace labyrinth
                         Checkpoint cpoint = new Checkpoint();
 
                         cpoint.coordinates = new int[] { y, x };
-                        
+                        cpoint.path = CopyList(path_to_checkpoint);
 
                         /*current_path.Add(new int[] { y, x });
 
